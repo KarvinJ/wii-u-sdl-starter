@@ -86,13 +86,17 @@ void render()
 
 int main(int argc, char **argv)
 {
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
-
     window = SDL_CreateWindow("Wii U SDL Starter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-        SDL_JoystickEventState(SDL_ENABLE);
+    if (startSDL(window, renderer) > 0)
+    {
+        return 1;
+    }
+
+    SDL_JoystickEventState(SDL_ENABLE);
     SDL_JoystickOpen(0);
+
     if (SDL_NumJoysticks() < 1)
     {
         printf("No game controllers connected!\n");

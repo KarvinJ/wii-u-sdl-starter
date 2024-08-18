@@ -1,4 +1,6 @@
 #include "sdl_starter.h"
+// #include <SDL2/SDL_image.h>
+#include <iostream>
 #include <whb/proc.h>
 
 int startSDL(SDL_Window *window, SDL_Renderer *renderer)
