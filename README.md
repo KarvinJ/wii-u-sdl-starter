@@ -1,8 +1,8 @@
-# WII U SDL STARTER
+# WII U SDL2 STARTER
 
 (Based off ChuckieEggNX)
 
-A Very simple Nintendo WiiU SDL STARTER.
+A Very simple Nintendo WiiU SDL2 STARTER.
 
 # Building
 
