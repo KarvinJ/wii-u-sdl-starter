@@ -1,5 +1,7 @@
 #include "sdl_starter.h"
-// #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <whb/proc.h>
 
@@ -28,22 +30,22 @@ int startSDL(SDL_Window *window, SDL_Renderer *renderer)
         return 1;
     }
 
-    // if (!IMG_Init(IMG_INIT_PNG))
-    // {
-    //     std::cout << "SDL_image crashed. Error: " << SDL_GetError();
-    //     return 1;
-    // }
+    if (!IMG_Init(IMG_INIT_PNG))
+    {
+        std::cout << "SDL_image crashed. Error: " << SDL_GetError();
+        return 1;
+    }
 
-    // if (Mix_OpenAudio(48000, AUDIO_S16, 2, 4096) < 0)
-    // {
-    //     printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-    //     return 1;
-    // }
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    {
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+        return 1;
+    }
 
-    // if (TTF_Init() == -1)
-    // {
-    //     return 1;
-    // }
+    if (TTF_Init() == -1)
+    {
+        return 1;
+    }
 
     return 0;
 }

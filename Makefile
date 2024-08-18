@@ -5,16 +5,18 @@
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
 endif
-
 TOPDIR ?= $(CURDIR)
-
 include $(DEVKITPRO)/wut/share/wut_rules
+
+#-------------------------------------------------------------------------------
+# pkg-config for libraries flags
+#-------------------------------------------------------------------------------
+PKGCONF		:=	$(PORTLIBS_PATH)/wiiu/bin/powerpc-eabi-pkg-config
 
 #-------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
 # INCLUDES is a list of directories containing header files
 # ROMFS is a folder to generate app's romfs
 #-------------------------------------------------------------------------------
@@ -22,10 +24,8 @@ TARGET		:=	Wii_U_SDL_Starter
 BUILD		:=	build
 SOURCES		:=	src
 INCLUDES	:=	include
-
-export APP_TV_SPLASH  := $(CURDIR)/assets/tv_splash.png
-export APP_DRC_SPLASH := $(CURDIR)/assets/drc_splash.png
-export APP_ICON       := $(CURDIR)/assets/icon.png
+# ROMFS		:=	romfs
+LIBRARIES	:=	SDL2_gfx SDL2_image SDL2_mixer SDL2_ttf sdl2 
 
 #-------------------------------------------------------------------------------
 # options for code generation
@@ -35,21 +35,22 @@ CFLAGS		:=	-g -Wall -O2 -ffunction-sections \
 
 CFLAGS		+=	$(INCLUDE) -D__WIIU__ -D__WUT__
 
-CFLAGS		+=  `powerpc-eabi-pkg-config --libs sdl2` -lwut -lm
+CFLAGS		+=	`$(PKGCONF) --cflags $(LIBRARIES)`
 
 CXXFLAGS	:=	$(CFLAGS)
 
 ASFLAGS		:=	-g $(MACHDEP)
-LDFLAGS		:=	-g $(MACHDEP) $(RPXSPECS) -Wl,-Map,$(notdir $*.map) 
+LDFLAGS		:=	-g $(MACHDEP) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
 
-LIBS		:=   `powerpc-eabi-pkg-config --libs sdl2` -lwut -lm
+LIBS		:=	`$(PKGCONF) --libs $(LIBRARIES)`
+LIBS		+=	-lwut 
+
 
 #-------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level
 # containing include and lib
 #-------------------------------------------------------------------------------
-LIBDIRS		:=	$(PORTLIBS) $(WUT_ROOT) 
-
+LIBDIRS		:=	$(PORTLIBS) $(WUT_ROOT)
 
 #-------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -83,8 +84,7 @@ endif
 #-------------------------------------------------------------------------------
 
 export SRCFILES		:=	$(CPPFILES) $(CFILES) $(SFILES)
-export OFILES 		:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-
+export OFILES		:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 export INCLUDE		:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 				-I$(CURDIR)/$(BUILD)
@@ -103,7 +103,7 @@ $(BUILD): $(SRCFILES)
 #-------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).rpx $(TARGET).elf $(TARGET).wuhb
+	@rm -fr $(BUILD) $(TARGET).rpx $(TARGET).elf
 
 #-------------------------------------------------------------------------------
 else
@@ -124,12 +124,9 @@ DEPENDS		:=	$(OFILES:.o=.d)
 #-------------------------------------------------------------------------------
 # main targets
 #-------------------------------------------------------------------------------
-all		:	$(OUTPUT).wuhb
-
-$(OUTPUT).wuhb	:	$(OUTPUT).rpx
+all		:	$(OUTPUT).rpx
 
 $(OUTPUT).rpx	:	$(OUTPUT).elf
-
 $(OUTPUT).elf	:	$(OFILES)
 
 -include $(DEPENDS)
