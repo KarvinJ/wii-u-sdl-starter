@@ -24,8 +24,8 @@ TARGET		:=	Wii_U_SDL_Starter
 BUILD		:=	build
 SOURCES		:=	src
 INCLUDES	:=	include
-# ROMFS		:=	romfs
-LIBRARIES	:=	SDL2_gfx SDL2_image SDL2_mixer SDL2_ttf sdl2 
+ROMFS		:=	romfs
+LIBRARIES	:=	SDL2_image SDL2_mixer SDL2_ttf sdl2 
 
 #-------------------------------------------------------------------------------
 # options for code generation

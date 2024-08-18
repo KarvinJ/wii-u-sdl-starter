@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
+#include <whb/proc.h>
 
 // some switch buttons
 #define BUTTON_A 0
