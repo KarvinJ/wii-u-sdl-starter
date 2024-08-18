@@ -1,7 +1,3 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
 #include "sdl_starter.h"
 #include "sdl_assets_loader.h"
 
@@ -11,11 +7,15 @@ SDL_GameController *controller = nullptr;
 
 bool isGamePaused;
 
-const int SPEED = 600;
-
-SDL_Rect player = {SCREEN_WIDTH / 2 - 64, SCREEN_HEIGHT / 2 - 64, 64, 64};
+const int PLAYER_SPEED = 600;
 
 Sprite playerSprite;
+
+Mix_Music *music = nullptr;
+Mix_Chunk *sound = nullptr;
+
+SDL_Texture *pauseGameTexture = nullptr;
+SDL_Rect pauseGameBounds;
 
 bool shouldCloseTheGame;
 
@@ -48,6 +48,7 @@ void handleEvents()
             if (event.jbutton.button == BUTTON_PLUS)
             {
                 isGamePaused = !isGamePaused;
+                Mix_PlayChannel(-1, sound, 0);
             }
         }
     }
@@ -55,24 +56,24 @@ void handleEvents()
 
 void update(float deltaTime)
 {
-    if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP) && player.y > 0)
+    if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP) && playerSprite.textureBounds.y > 0)
     {
-        player.y -= SPEED * deltaTime;
+        playerSprite.textureBounds.y -= PLAYER_SPEED * deltaTime;
     }
 
-    else if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN) && player.y < SCREEN_HEIGHT - player.h)
+    else if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN) && playerSprite.textureBounds.y < SCREEN_HEIGHT - playerSprite.textureBounds.h)
     {
-        player.y += SPEED * deltaTime;
+        playerSprite.textureBounds.y += PLAYER_SPEED * deltaTime;
     }
 
-    else if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT) && player.x > 0)
+    else if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT) && playerSprite.textureBounds.x > 0)
     {
-        player.x -= SPEED * deltaTime;
+        playerSprite.textureBounds.x -= PLAYER_SPEED * deltaTime;
     }
 
-    else if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) && player.x < SCREEN_WIDTH - player.w)
+    else if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) && playerSprite.textureBounds.x < SCREEN_WIDTH - playerSprite.textureBounds.w)
     {
-        player.x += SPEED * deltaTime;
+        playerSprite.textureBounds.x += PLAYER_SPEED * deltaTime;
     }
 }
 
@@ -88,9 +89,12 @@ void render()
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-    SDL_RenderFillRect(renderer, &player);
-
     renderSprite(playerSprite);
+
+    if (isGamePaused)
+    {
+        SDL_RenderCopy(renderer, pauseGameTexture, NULL, &pauseGameBounds);
+    }
 
     SDL_RenderPresent(renderer);
 }
@@ -104,7 +108,6 @@ int main(int argc, char **argv)
     {
         return 1;
     }
-
 
     SDL_JoystickEventState(SDL_ENABLE);
     SDL_JoystickOpen(0);
@@ -126,6 +129,25 @@ int main(int argc, char **argv)
 
     playerSprite = loadSprite(renderer, "sprites/alien_1.png", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2);
 
+    TTF_Font *font = TTF_OpenFont("fonts/LeroyLetteringLightBeta01.ttf", 36);
+
+    // render text as texture
+    updateTextureText(pauseGameTexture, "Game Paused", font, renderer);
+
+    SDL_QueryTexture(pauseGameTexture, NULL, NULL, &pauseGameBounds.w, &pauseGameBounds.h);
+    pauseGameBounds.x = SCREEN_WIDTH / 2 - pauseGameBounds.w / 2;
+    pauseGameBounds.y = 200;
+
+    // no need to keep the font loaded
+    TTF_CloseFont(font);
+
+    // load music and sounds from files
+    sound = loadSound("sounds/pop1.wav");
+
+    music = loadMusic("music/background.ogg");
+
+    Mix_PlayMusic(music, -1);
+
     Uint32 previousFrameTime = SDL_GetTicks();
     Uint32 currentFrameTime = previousFrameTime;
     float deltaTime = 0.0f;
@@ -139,7 +161,12 @@ int main(int argc, char **argv)
         SDL_GameControllerUpdate();
 
         handleEvents();
-        update(deltaTime);
+
+        if (!isGamePaused)
+        {
+            update(deltaTime);
+        }
+        
         render();
     }
 
