@@ -1,8 +1,8 @@
 # WII U SDL STARTER
 
-(Based off DrawNXSDL)
+(Based off ChuckieEggNX)
 
-Very simple Nintendo WiiU SDL STARTER.
+A Very simple Nintendo WiiU SDL STARTER.
 
 # Building
 
