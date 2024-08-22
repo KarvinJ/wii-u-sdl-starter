@@ -1,11 +1,10 @@
 #include "sdl_starter.h"
 #include "sdl_assets_loader.h"
+#include <time.h>
 
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 SDL_GameController *controller = nullptr;
-
-bool isGamePaused;
 
 const int PLAYER_SPEED = 600;
 
@@ -14,10 +13,30 @@ Sprite playerSprite;
 Mix_Music *music = nullptr;
 Mix_Chunk *sound = nullptr;
 
+bool isGamePaused;
+
 SDL_Texture *pauseGameTexture = nullptr;
 SDL_Rect pauseGameBounds;
 
 bool shouldCloseTheGame;
+
+SDL_Rect ball = {SCREEN_WIDTH / 2 + 50, SCREEN_HEIGHT / 2, 32, 32};
+
+int ballVelocityX = 400;
+int ballVelocityY = 400;
+
+int colorIndex;
+
+SDL_Color colors[] = {
+    {128, 128, 128, 0}, // gray
+    {255, 255, 255, 0}, // white
+    {255, 0, 0, 0},     // red
+    {0, 255, 0, 0},     // green
+    {0, 0, 255, 0},     // blue
+    {255, 255, 0, 0},   // brown
+    {0, 255, 255, 0},   // cyan
+    {255, 0, 255, 0},   // purple
+};
 
 void quitGame()
 {
@@ -54,6 +73,11 @@ void handleEvents()
     }
 }
 
+int rand_range(int min, int max)
+{
+    return min + rand() / (RAND_MAX / (max - min + 1) + 1);
+}
+
 void update(float deltaTime)
 {
     if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP) && playerSprite.textureBounds.y > 0)
@@ -75,6 +99,31 @@ void update(float deltaTime)
     {
         playerSprite.textureBounds.x += PLAYER_SPEED * deltaTime;
     }
+
+    if (ball.x < 0 || ball.x > SCREEN_WIDTH - ball.w)
+    {
+        ballVelocityX *= -1;
+
+        colorIndex = rand_range(0, 5);
+    }
+
+    else if (ball.y < 0 || ball.y > SCREEN_HEIGHT - ball.h)
+    {
+        ballVelocityY *= -1;
+
+        colorIndex = rand_range(0, 5);
+    }
+
+    else if (SDL_HasIntersection(&playerSprite.textureBounds, &ball))
+    {
+        ballVelocityX *= -1;
+        ballVelocityY *= -1;
+
+        colorIndex = rand_range(0, 5);
+    }
+
+    ball.x += ballVelocityX * deltaTime;
+    ball.y += ballVelocityY * deltaTime;
 }
 
 void renderSprite(Sprite sprite)
@@ -87,14 +136,16 @@ void render()
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-    renderSprite(playerSprite);
-
     if (isGamePaused)
     {
         SDL_RenderCopy(renderer, pauseGameTexture, NULL, &pauseGameBounds);
     }
+
+    SDL_SetRenderDrawColor(renderer, colors[colorIndex].r, colors[colorIndex].g, colors[colorIndex].b, 255);
+
+    SDL_RenderFillRect(renderer, &ball);
+
+    renderSprite(playerSprite);
 
     SDL_RenderPresent(renderer);
 }
@@ -166,7 +217,7 @@ int main(int argc, char **argv)
         {
             update(deltaTime);
         }
-        
+
         render();
     }
 
