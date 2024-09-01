@@ -55,6 +55,7 @@ void handleEvents()
         if (event.type == SDL_QUIT)
         {
             shouldCloseTheGame = true;
+            break;
         }
 
         if (event.type == SDL_JOYBUTTONDOWN)
@@ -62,6 +63,7 @@ void handleEvents()
             if (event.jbutton.button == BUTTON_MINUS)
             {
                 shouldCloseTheGame = true;
+                break;
             }
 
             if (event.jbutton.button == BUTTON_PLUS)
