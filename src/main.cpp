@@ -1,6 +1,9 @@
 #include "sdl_starter.h"
 #include "sdl_assets_loader.h"
 #include <time.h>
+#include <unistd.h> // chdir header
+#include <romfs-wiiu.h>
+#include <whb/proc.h>
 
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
@@ -154,6 +157,10 @@ void render()
 
 int main(int argc, char **argv)
 {
+    WHBProcInit();
+    romfsInit();
+    chdir("romfs:/");
+
     window = SDL_CreateWindow("Wii U SDL Starter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 

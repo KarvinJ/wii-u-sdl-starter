@@ -2,17 +2,10 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
-#include <romfs-wiiu.h>
 #include <iostream>
-#include <unistd.h> // chdir header
 
 int startSDL(SDL_Window *window, SDL_Renderer *renderer)
 {
-    WHBProcInit();
-
-    romfsInit();
-    chdir("romfs:/");
-
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0)
     {
         std::cout << "SDL crashed. Error: " << SDL_GetError();
