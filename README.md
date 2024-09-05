@@ -2,7 +2,7 @@
 
 (Based off ChuckieEggNX)
 
-A Very simple Nintendo WiiU SDL2 STARTER.
+A Nintendo WiiU SDL2 STARTER.
 
 # Building
 
