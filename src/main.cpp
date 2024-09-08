@@ -111,6 +111,7 @@ void update(float deltaTime)
 
         colorIndex = rand_range(0, 5);
     }
+    
 
     else if (ball.y < 0 || ball.y > SCREEN_HEIGHT - ball.h)
     {
