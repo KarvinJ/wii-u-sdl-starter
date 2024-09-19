@@ -21,6 +21,13 @@ bool isGamePaused;
 SDL_Texture *pauseGameTexture = nullptr;
 SDL_Rect pauseGameBounds;
 
+SDL_Texture *scoreTexture = nullptr;
+SDL_Rect scoreBounds;
+
+int score;
+
+TTF_Font *font = nullptr;
+
 bool shouldCloseTheGame;
 
 SDL_Rect ball = {SCREEN_WIDTH / 2 + 50, SCREEN_HEIGHT / 2, 32, 32};
@@ -125,6 +132,14 @@ void update(float deltaTime)
         ballVelocityY *= -1;
 
         colorIndex = rand_range(0, 5);
+
+        Mix_PlayChannel(-1, sound, 0);
+
+        score++;
+
+        std::string scoreString = "SCORE: " + std::to_string(score);
+
+        updateTextureText(scoreTexture, scoreString.c_str(), font, renderer);
     }
 
     ball.x += ballVelocityX * deltaTime;
@@ -141,16 +156,21 @@ void render()
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    if (isGamePaused)
-    {
-        SDL_RenderCopy(renderer, pauseGameTexture, NULL, &pauseGameBounds);
-    }
-
     SDL_SetRenderDrawColor(renderer, colors[colorIndex].r, colors[colorIndex].g, colors[colorIndex].b, 255);
 
     SDL_RenderFillRect(renderer, &ball);
 
     renderSprite(playerSprite);
+
+    if (isGamePaused)
+    {
+        SDL_RenderCopy(renderer, pauseGameTexture, NULL, &pauseGameBounds);
+    }
+
+    SDL_QueryTexture(scoreTexture, NULL, NULL, &scoreBounds.w, &scoreBounds.h);
+    scoreBounds.x = SCREEN_WIDTH / 2 - pauseGameBounds.w / 2;
+    scoreBounds.y = scoreBounds.h / 2;
+    SDL_RenderCopy(renderer, scoreTexture, NULL, &scoreBounds);
 
     SDL_RenderPresent(renderer);
 }
@@ -189,17 +209,19 @@ int main(int argc, char **argv)
 
     playerSprite = loadSprite(renderer, "sprites/alien_1.png", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2);
 
-    TTF_Font *font = TTF_OpenFont("fonts/LeroyLetteringLightBeta01.ttf", 36);
+    font = TTF_OpenFont("fonts/LeroyLetteringLightBeta01.ttf", 36);
 
     // render text as texture
-    updateTextureText(pauseGameTexture, "Game Paused", font, renderer);
+    updateTextureText(scoreTexture, "SCORE: 0", font, renderer);
+
+    updateTextureText(pauseGameTexture, "GAME PAUSED", font, renderer);
 
     SDL_QueryTexture(pauseGameTexture, NULL, NULL, &pauseGameBounds.w, &pauseGameBounds.h);
     pauseGameBounds.x = SCREEN_WIDTH / 2 - pauseGameBounds.w / 2;
     pauseGameBounds.y = 200;
 
     // no need to keep the font loaded
-    TTF_CloseFont(font);
+    // TTF_CloseFont(font);
 
     // load music and sounds from files
     sound = loadSound("sounds/pop1.wav");
