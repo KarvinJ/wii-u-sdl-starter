@@ -146,7 +146,7 @@ void update(float deltaTime)
     ball.y += ballVelocityY * deltaTime;
 }
 
-void renderSprite(Sprite sprite)
+void renderSprite(Sprite &sprite)
 {
     SDL_RenderCopy(renderer, sprite.texture, NULL, &sprite.textureBounds);
 }
