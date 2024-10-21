@@ -19,8 +19,6 @@ I built everything using Windows 10
 *  and then
   `pacman -Syu wiiu-sdl2 wiiu-sdl2_image wiiu-sdl2_mixer wiiu-sdl2_ttf`
   
-* Clone this repo:  
-  `git clone https://github.com/ArkhamKnightXD/wii-u-sdl-starter.git`
-
+* Clone this repo
 * `cd wii-u-sdl-starter`
 * `make`
