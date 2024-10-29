@@ -13,11 +13,12 @@ Requires devkitPro with the Nintendo WiiU toolchain, SDL2 for WiiU and libromfs-
 I built everything using Windows 10
 
 * Install [devkitpro](https://devkitpro.org/wiki/Getting_Started#Unix-like_platforms)
-* Install [libromfs-wiiu](https://github.com/yawut/libromfs-wiiu)
 * On a terminal install needed libraries:
   `pacman -S wiiu-dev`
 *  and then
   `pacman -Syu wiiu-sdl2 wiiu-sdl2_image wiiu-sdl2_mixer wiiu-sdl2_ttf`
+
+* Install [libromfs-wiiu](https://github.com/yawut/libromfs-wiiu)
   
 * Clone this repo
 * `cd wii-u-sdl-starter`
