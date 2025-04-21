@@ -192,20 +192,8 @@ int main(int argc, char **argv)
     SDL_JoystickEventState(SDL_ENABLE);
     SDL_JoystickOpen(0);
 
-    if (SDL_NumJoysticks() < 1)
-    {
-        printf("No game controllers connected!\n");
-        return -1;
-    }
-    else
-    {
-        controller = SDL_GameControllerOpen(0);
-        if (controller == NULL)
-        {
-            printf("Unable to open game controller! SDL Error: %s\n", SDL_GetError());
-            return -1;
-        }
-    }
+    //the controller is always connected in this console.
+    controller = SDL_GameControllerOpen(0);
 
     playerSprite = loadSprite(renderer, "sprites/alien_1.png", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2);
 
@@ -220,12 +208,8 @@ int main(int argc, char **argv)
     pauseGameBounds.x = SCREEN_WIDTH / 2 - pauseGameBounds.w / 2;
     pauseGameBounds.y = 200;
 
-    // no need to keep the font loaded
-    // TTF_CloseFont(font);
-
     // load music and sounds from files
     sound = loadSound("sounds/pop1.wav");
-
     music = loadMusic("music/background.ogg");
 
     Mix_PlayMusic(music, -1);
