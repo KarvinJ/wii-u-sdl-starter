@@ -77,7 +77,7 @@ void handleEvents()
     }
 }
 
-int rand_range(int min, int max)
+int getRandomNumberBetweenRange(int min, int max)
 {
     return min + rand() / (RAND_MAX / (max - min + 1) + 1);
 }
@@ -108,14 +108,14 @@ void update(float deltaTime)
     {
         ballVelocityX *= -1;
 
-        colorIndex = rand_range(0, 5);
+        colorIndex = getRandomNumberBetweenRange(0, 5);
     }
 
     else if (ball.y < 0 || ball.y > SCREEN_HEIGHT - ball.h)
     {
         ballVelocityY *= -1;
 
-        colorIndex = rand_range(0, 5);
+        colorIndex = getRandomNumberBetweenRange(0, 5);
     }
 
     else if (SDL_HasIntersection(&playerSprite.bounds, &ball))
@@ -123,7 +123,7 @@ void update(float deltaTime)
         ballVelocityX *= -1;
         ballVelocityY *= -1;
 
-        colorIndex = rand_range(0, 5);
+        colorIndex = getRandomNumberBetweenRange(0, 5);
 
         Mix_PlayChannel(-1, sound, 0);
 
@@ -235,6 +235,7 @@ int main(int argc, char **argv)
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     stopSDLSystems();
+    romfsExit();
     WHBProcShutdown();
 
     return 0;
