@@ -1,9 +1,9 @@
 #include "sdl_starter.h"
-#include "sdl_assets_loader.h"
 #include <time.h>
 #include <unistd.h> // chdir header
 #include <romfs-wiiu.h>
 #include <whb/proc.h>
+#include <string>
 
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
@@ -16,26 +16,26 @@ Sprite playerSprite;
 Mix_Music *music = nullptr;
 Mix_Chunk *sound = nullptr;
 
-bool isGamePaused;
+bool isGamePaused = false;
 
-SDL_Texture *pauseGameTexture = nullptr;
-SDL_Rect pauseGameBounds;
+SDL_Texture *pauseTexture = nullptr;
+SDL_Rect pauseBounds;
 
 SDL_Texture *scoreTexture = nullptr;
 SDL_Rect scoreBounds;
 
-int score;
+int score = 0;
 
 TTF_Font *font = nullptr;
 
-bool shouldCloseTheGame;
+bool isGameRunning = true;
 
 SDL_Rect ball = {SCREEN_WIDTH / 2 + 50, SCREEN_HEIGHT / 2, 32, 32};
 
 int ballVelocityX = 400;
 int ballVelocityY = 400;
 
-int colorIndex;
+int colorIndex = 0;
 
 SDL_Color colors[] = {
     {128, 128, 128, 0}, // gray
@@ -48,14 +48,6 @@ SDL_Color colors[] = {
     {255, 0, 255, 0},   // purple
 };
 
-void quitGame()
-{
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    WHBProcShutdown();
-}
-
 void handleEvents()
 {
     SDL_Event event;
@@ -64,7 +56,7 @@ void handleEvents()
     {
         if (event.type == SDL_QUIT)
         {
-            shouldCloseTheGame = true;
+            isGameRunning = false;
             break;
         }
 
@@ -72,7 +64,7 @@ void handleEvents()
         {
             if (event.jbutton.button == BUTTON_MINUS)
             {
-                shouldCloseTheGame = true;
+                isGameRunning = false;
                 break;
             }
 
@@ -164,11 +156,11 @@ void render()
 
     if (isGamePaused)
     {
-        SDL_RenderCopy(renderer, pauseGameTexture, NULL, &pauseGameBounds);
+        SDL_RenderCopy(renderer, pauseTexture, NULL, &pauseBounds);
     }
 
     SDL_QueryTexture(scoreTexture, NULL, NULL, &scoreBounds.w, &scoreBounds.h);
-    scoreBounds.x = SCREEN_WIDTH / 2 - pauseGameBounds.w / 2;
+    scoreBounds.x = SCREEN_WIDTH / 2 - pauseBounds.w / 2;
     scoreBounds.y = scoreBounds.h / 2;
     SDL_RenderCopy(renderer, scoreTexture, NULL, &scoreBounds);
 
@@ -184,7 +176,7 @@ int main(int argc, char **argv)
     window = SDL_CreateWindow("Wii U SDL Starter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-    if (startSDL(window, renderer) > 0)
+    if (startSDLSystems(window, renderer) > 0)
     {
         return 1;
     }
@@ -202,11 +194,11 @@ int main(int argc, char **argv)
     // render text as texture
     updateTextureText(scoreTexture, "SCORE: 0", font, renderer);
 
-    updateTextureText(pauseGameTexture, "GAME PAUSED", font, renderer);
+    updateTextureText(pauseTexture, "GAME PAUSED", font, renderer);
 
-    SDL_QueryTexture(pauseGameTexture, NULL, NULL, &pauseGameBounds.w, &pauseGameBounds.h);
-    pauseGameBounds.x = SCREEN_WIDTH / 2 - pauseGameBounds.w / 2;
-    pauseGameBounds.y = 200;
+    SDL_QueryTexture(pauseTexture, NULL, NULL, &pauseBounds.w, &pauseBounds.h);
+    pauseBounds.x = SCREEN_WIDTH / 2 - pauseBounds.w / 2;
+    pauseBounds.y = 200;
 
     // load music and sounds from files
     sound = loadSound("sounds/pop1.wav");
@@ -218,7 +210,7 @@ int main(int argc, char **argv)
     Uint32 currentFrameTime = previousFrameTime;
     float deltaTime = 0.0f;
 
-    while (!shouldCloseTheGame && WHBProcIsRunning())
+    while (isGameRunning && WHBProcIsRunning())
     {
         currentFrameTime = SDL_GetTicks();
         deltaTime = (currentFrameTime - previousFrameTime) / 1000.0f;
@@ -236,5 +228,14 @@ int main(int argc, char **argv)
         render();
     }
 
-    quitGame();
+    Mix_FreeMusic(music);
+    Mix_FreeChunk(sound);
+    SDL_DestroyTexture(playerSprite.texture);
+    SDL_DestroyTexture(pauseTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    stopSDLSystems();
+    WHBProcShutdown();
+
+    return 0;
 }
